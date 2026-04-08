@@ -1,3 +1,5 @@
+import 'dart:ui' show PointerDeviceKind;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,6 +23,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Todo App',
+      scrollBehavior: const _AppScrollBehavior(),
       theme: ThemeData(
         colorScheme: baseScheme,
         useMaterial3: true,
@@ -91,38 +94,32 @@ class _TodoPageState extends ConsumerState<TodoPage> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 920),
               child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
                 padding: EdgeInsets.fromLTRB(20, isWide ? 28 : 20, 20, 28),
                 children: [
                   _HeroPanel(todoCount: todos.length),
                   const SizedBox(height: 18),
                   _ComposerCard(controller: _controller, onAdd: _addTodo),
                   const SizedBox(height: 18),
-                  Row(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Text(
-                          todos.isEmpty ? '오늘의 목록' : '해야 할 일 ${todos.length}개',
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.8,
-                          ),
+                      Text(
+                        todos.isEmpty ? '오늘의 목록' : '해야 할 일 ${todos.length}개',
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.8,
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1C3F36),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          todos.isEmpty ? 'Ready' : 'In Focus',
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: const Color(0xFFF8F5EF),
-                            fontWeight: FontWeight.w700,
-                          ),
+                      const SizedBox(height: 6),
+                      Text(
+                        todos.isEmpty
+                            ? '새로운 할 일을 추가하면 이 아래에 차분하게 정리돼요.'
+                            : '중요한 순서대로 확인하고 하나씩 비워보세요.',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: const Color(0xFF6A675F),
                         ),
                       ),
                     ],
@@ -217,13 +214,29 @@ class _HeroPanel extends StatelessWidget {
             runSpacing: 12,
             children: [
               _MetricChip(label: 'Tasks', value: '$todoCount'),
-              const _MetricChip(label: 'Mood', value: 'Calm'),
+              _MetricChip(
+                label: 'Status',
+                value: todoCount == 0 ? 'Start' : 'Active',
+              ),
             ],
           ),
         ],
       ),
     );
   }
+}
+
+class _AppScrollBehavior extends MaterialScrollBehavior {
+  const _AppScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.trackpad,
+    PointerDeviceKind.stylus,
+    PointerDeviceKind.unknown,
+  };
 }
 
 class _MetricChip extends StatelessWidget {
