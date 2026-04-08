@@ -20,6 +20,7 @@
 프로젝트 폴더에서 아래 명령어를 실행한다.
 
 ```bash
+flutter create .
 flutter pub get
 flutter run
 ```
