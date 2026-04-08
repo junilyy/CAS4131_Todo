@@ -13,6 +13,10 @@ import 'package:todo/main.dart';
 
 void main() {
   testWidgets('todo can be added and removed', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 1400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
     await tester.pumpWidget(const ProviderScope(child: MyApp()));
 
     expect(find.text('등록된 할 일이 없습니다.'), findsOneWidget);
@@ -23,7 +27,9 @@ void main() {
 
     expect(find.text('과제 제출하기'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.delete_outline));
+    final deleteButton = find.byIcon(Icons.delete_outline_rounded);
+    await tester.ensureVisible(deleteButton);
+    await tester.tap(deleteButton);
     await tester.pump();
 
     expect(find.text('과제 제출하기'), findsNothing);
